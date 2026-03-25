@@ -2,11 +2,14 @@ package com.example.userrest.config;
 
 import com.example.userrest.filter.AuthTokenFilter;
 import com.example.userrest.service.SoapAuthClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
 
 /**
  * Web layer configuration:
@@ -20,9 +23,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final SoapAuthClient soapAuthClient;
+    private final String[] allowedOrigins;
 
-    public WebConfig(SoapAuthClient soapAuthClient) {
+    public WebConfig(
+            SoapAuthClient soapAuthClient,
+            @Value("${app.cors.allowed-origins:http://localhost:3000}") String corsAllowedOrigins) {
         this.soapAuthClient = soapAuthClient;
+        this.allowedOrigins = Arrays.stream(corsAllowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toArray(String[]::new);
     }
 
     // ── CORS ──────────────────────────────────────────────────────────────────
@@ -34,7 +44,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*")
+                .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
