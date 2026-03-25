@@ -10,12 +10,8 @@ FROM gcr.io/distroless/java17-debian12:nonroot AS runtime
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Environment variables for DB config (override as needed)
-ENV PROFILE_DB_URL=jdbc:postgresql://localhost:5432/profile_db \
-    PROFILE_DB_USER=postgres \
-    PROFILE_DB_PASSWORD= \
-    SOAP_SERVICE_URL=http://localhost:3001/ws \
-    PORT=8080
+# Runtime port (all DB/service settings should be provided by deployment env vars)
+ENV PORT=8080
 
 EXPOSE 8080
-ENTRYPOINT ["-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
