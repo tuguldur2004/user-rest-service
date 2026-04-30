@@ -51,3 +51,17 @@ Before deploying, replace all `CHANGE_ME` values with real secrets.
 - The app expects PostgreSQL to be reachable from the internet/VPC.
 - Keep `PROFILE_DB_PASSWORD` in DigitalOcean encrypted secrets.
 - CORS is restricted by `CORS_ALLOWED_ORIGINS` in production profile.
+
+## Deploy to DigitalOcean Droplets
+
+For the 3-droplet topology, run the REST service on the same droplet as the SOAP service, but expose it on a different host port:
+
+- REST service host port: `8081`
+- SOAP service host port: `8082`
+
+Set `SOAP_SERVICE_URL` to the SOAP service on the same droplet, for example:
+
+- `SOAP_SERVICE_URL=http://soap-service:8080/ws` when both services run in Docker Compose on one droplet
+- `SOAP_SERVICE_URL=http://<rest-soap-private-ip>:8082/ws` when calling the SOAP service through the droplet host port
+
+The gateway should call the REST service through the private VPC address, not a public IP.
